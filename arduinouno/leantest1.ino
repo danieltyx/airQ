@@ -25,25 +25,25 @@ float ptempmin = 73.0;
 int results; 
 void tempmove(float tempdiff) {
   int pos; 
-  if (tempdiff<1) {
+  if (tempdiff < 1) {
      pos = 1000 + 99.0 * 1000 / 100.0; 
-     results=1.0;
+     results = 1.0;
   }
   if (tempdiff > 1 && tempdiff <= 5) {
      pos = 1000 + 75.0 * 1000 / 100.0; 
-     results=25.0;
+     results = 25.0;
   }
-  if (tempdiff > 5 && tempdiff<=10) {
-     pos = 1000 + 50.0*1000/100.0; 
-     results=50.0;
+  if (tempdiff > 5 && tempdiff <= 10) {
+     pos = 1000 + 50.0 * 1000 / 100.0; 
+     results = 50.0;
   }
-  if (tempdiff > 10 && tempdiff<=15) {
-     pos = 1000 + 25.0*1000/100.0; 
-     results=75.0; 
+  if (tempdiff > 10 && tempdiff <= 15) {
+     pos = 1000 + 25.0 * 1000 / 100.0; 
+     results = 75.0; 
   }
-  if (tempdiff>15) {
-     pos = 1000 + 1.0*1000/100.0; 
-     results=99.0; 
+  if (tempdiff > 15) {
+     pos = 1000 + 1.0 * 1000 / 100.0; 
+     results = 99.0; 
   }
   myServo.writeMicroseconds(pos);  
    
