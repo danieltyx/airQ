@@ -4,9 +4,9 @@
 Servo myServo; 
 #define potpin 8; 
 
-void findstrokepercent(float strokepercent ) {
+void findstrokepercent(float strokepercent) {
   if (strokepercent >= 1.0 && strokepercent <= 99.0) {
-    int pos = 1000+ strokepercent*1000/100.0; 
+    int pos = 1000 + strokepercent * 1000 / 100.0; 
     myServo.writeMicroseconds(pos); 
 
     //In this case, full range runs from about 1000-2000 usec.
