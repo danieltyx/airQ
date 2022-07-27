@@ -52,18 +52,18 @@
 // #endif // IOT_CONFIG_USE_X509_CERT
 
 // Azure IoT Central
-#define DPS_ID_SCOPE                      "0ne006C914C"
-#define IOT_CONFIG_DEVICE_ID              "mydevice"
+#define DPS_ID_SCOPE                      "0ne006CFBCC"
+#define IOT_CONFIG_DEVICE_ID              "g1y94a3jk8"
 // Use device key if not using certificates
 #ifndef IOT_CONFIG_USE_X509_CERT
-  #define IOT_CONFIG_DEVICE_KEY             "cb3r1W7sPJr4Wn28Vabj2nnOUyJrg732WroMFQKqPXc="
+  #define IOT_CONFIG_DEVICE_KEY             "J04t8DSuvuh8ZcwDfldJVqsWCQGsddlVsXfHgvqQB+o="
 #endif  // IOT_CONFIG_USE_X509_CERT
 
 
 // User-agent (url-encoded) provided by the MQTT client to Azure IoT Services.
 // When developing for your own Arduino-based platform,
 // please update the suffix with the format '(ard;<platform>)' as an url-encoded string.
-#define AZURE_SDK_CLIENT_USER_AGENT       "c%2F" AZ_SDK_VERSION_STRING "(ard%3Besp32)"
+#define AZURE_SDK_CLIENT_USER_AGENT       "c%2F" AZ_SDK_VERSION_STRING "(ard%3Besp32)2"
 
 // Publish 1 message every 2 seconds.
 #define TELEMETRY_FREQUENCY_IN_SECONDS    2

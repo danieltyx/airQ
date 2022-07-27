@@ -249,11 +249,10 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
 
   // Acquiring data from Espressif's ESP32 Azure IoT Kit sensors.
   //temperature = esp32_azureiotkit_get_temperature();
-  roomtemp = dht.readTemperature();
+  roomtemp = dht.readTemperature()*1.8+32;
   roomhum = dht.readHumidity();
-  Serial.print(dht.readTemperature());
   //humidity = esp32_azureiotkit_get_humidity();
-  outsidetemp = dhtout.readTemperature();
+  outsidetemp = dhtout.readTemperature()*1.8+32;
   outsidehum = dhtout.readHumidity();
   // esp32_azureiotkit_get_pressure_altitude(&pressure, &altitude);
   altitude = 0;
@@ -286,50 +285,50 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_double(&jw, outsidehum, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pressure property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ALTITUDE));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, altitude, DOUBLE_DECIMAL_PLACE_DIGITS);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ALTITUDE));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property name to telemetry payload.");
+  // rc = az_json_writer_append_double(&jw, altitude, DOUBLE_DECIMAL_PLACE_DIGITS);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERX));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, magneticFieldX);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERX));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, magneticFieldX);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERY));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, magneticFieldY);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERY));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, magneticFieldY);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERZ));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, magneticFieldZ);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERZ));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, magneticFieldZ);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_PITCH));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, pitch);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_PITCH));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, pitch);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ROLL));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, roll);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ROLL));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, roll);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERX));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationX);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERX));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, accelerationX);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERY));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationY);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERY));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, accelerationY);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERZ));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationZ);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERZ));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, accelerationZ);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property value to telemetry payload.");
 
   rc = az_json_writer_append_end_object(&jw);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed closing telemetry json payload.");
