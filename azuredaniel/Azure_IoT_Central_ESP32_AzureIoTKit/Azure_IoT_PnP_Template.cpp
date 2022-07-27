@@ -242,7 +242,7 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   az_result rc;
   az_span payload_buffer_span = az_span_create(payload_buffer, payload_buffer_size);
   az_span json_span;
-  float roomtemp, roomhum, outsidetemp, pressure, altitude;
+  float roomtemp, roomhum, outsidetemp, outsidehum, altitude;
 
   int32_t magneticFieldX, magneticFieldY, magneticFieldZ;
   int32_t pitch, roll, accelerationX, accelerationY, accelerationZ;
@@ -254,7 +254,9 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   Serial.print(dht.readTemperature());
   //humidity = esp32_azureiotkit_get_humidity();
   outsidetemp = dhtout.readTemperature();
-  esp32_azureiotkit_get_pressure_altitude(&pressure, &altitude);
+  outsidehum = dhtout.readHumidity();
+  // esp32_azureiotkit_get_pressure_altitude(&pressure, &altitude);
+  altitude = 0;
   esp32_azureiotkit_get_magnetometer(&magneticFieldX, &magneticFieldY, &magneticFieldZ);
   esp32_azureiotkit_get_pitch_roll_accel(&pitch, &roll, &accelerationX, &accelerationY, &accelerationZ);
 
@@ -279,9 +281,9 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_double(&jw, outsidetemp, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding light property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_PRESSURE));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_OUTSIDE_HUMIDITY));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pressure property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, pressure, DOUBLE_DECIMAL_PLACE_DIGITS);
+  rc = az_json_writer_append_double(&jw, outsidehum, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pressure property value to telemetry payload.");
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ALTITUDE));
