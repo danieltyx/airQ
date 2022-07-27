@@ -109,9 +109,8 @@ static bool send_device_info = true;
 
 
 #include "DHT.h"
-#define DHT11PIN 16
 
-DHT dht(DHT11PIN, DHT11);
+// DHT dht(DHT11PIN, DHT11);
 
 
 /* --- MQTT Interface Functions --- */
@@ -330,8 +329,8 @@ static void on_command_request_received(command_request_t command)
 void setup()
 {
 
-  Serial.begin(115200);
-  dht.begin();
+  // Serial.begin(115200);
+  // dht.begin();
 
   Serial.begin(SERIAL_LOGGER_BAUD_RATE);
   set_logging_function(logging_function);
@@ -387,14 +386,14 @@ void loop()
 {
 
 
-  float humi = dht.readHumidity();
-  float temp = dht.readTemperature();
-  Serial.print("Temperature: ");
-  Serial.print(temp);
-  Serial.print("ºC ");
-  Serial.print("Humidity: ");
-  Serial.println(humi);
-  delay(1000);
+  // float humi = dht.readHumidity();
+  // float temp = dht.readTemperature();
+  // Serial.print("Temperature: ");
+  // Serial.print(temp*1.8+32);
+  // Serial.print("ºF ");
+  // Serial.print("Humidity: ");
+  // Serial.println(humi);
+  // delay(1000);
   if (WiFi.status() != WL_CONNECTED)
   {
     connect_to_wifi();

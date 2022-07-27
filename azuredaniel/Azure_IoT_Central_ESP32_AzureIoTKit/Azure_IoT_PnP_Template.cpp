@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "DHT.h"
-// #define DHT11PIN 16
-
-// DHT dht(DHT11PIN, DHT11);
+#define DHT11PIN 19
+#define DHT11PINTOUT 16
+DHT dht(DHT11PIN, DHT11);
+DHT dhtout(DHT11PINTOUT,DHT11);
 #include <az_core.h>
 #include <az_iot.h>
 
@@ -41,10 +42,10 @@
 #define SAMPLE_TOTAL_STORAGE_PROPERTY_VALUE            4096
 #define SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE             8192
 
-#define TELEMETRY_PROP_NAME_TEMPERATURE                "temperature"
-#define TELEMETRY_PROP_NAME_HUMIDITY                   "humidity"
-#define TELEMETRY_PROP_NAME_LIGHT                      "light"
-#define TELEMETRY_PROP_NAME_PRESSURE                   "pressure"
+#define TELEMETRY_PROP_NAME_ROOM_TEMPERATURE                "roomtemp"
+#define TELEMETRY_PROP_NAME_ROOM_HUMIDITY                   "roomhum"
+#define TELEMETRY_PROP_NAME_OUTSIDE_TEMPERATURE                "outsidetemp"
+#define TELEMETRY_PROP_NAME_OUTSIDE_HUMIDITY                   "outsidehum"
 #define TELEMETRY_PROP_NAME_ALTITUDE                   "altitude"
 #define TELEMETRY_PROP_NAME_MAGNETOMETERX              "magnetometerX"
 #define TELEMETRY_PROP_NAME_MAGNETOMETERY              "magnetometerY"
@@ -241,15 +242,18 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   az_result rc;
   az_span payload_buffer_span = az_span_create(payload_buffer, payload_buffer_size);
   az_span json_span;
-  float temperature, humidity, light, pressure, altitude;
+  float roomtemp, roomhum, outsidetemp, pressure, altitude;
+
   int32_t magneticFieldX, magneticFieldY, magneticFieldZ;
   int32_t pitch, roll, accelerationX, accelerationY, accelerationZ;
 
   // Acquiring data from Espressif's ESP32 Azure IoT Kit sensors.
-  temperature = esp32_azureiotkit_get_temperature();
-  // temperature = dht.readTemperature();
-  humidity = esp32_azureiotkit_get_humidity();
-  light = esp32_azureiotkit_get_ambientLight();
+  //temperature = esp32_azureiotkit_get_temperature();
+  roomtemp = dht.readTemperature();
+  roomhum = dht.readHumidity();
+  Serial.print(dht.readTemperature());
+  //humidity = esp32_azureiotkit_get_humidity();
+  outsidetemp = dhtout.readTemperature();
   esp32_azureiotkit_get_pressure_altitude(&pressure, &altitude);
   esp32_azureiotkit_get_magnetometer(&magneticFieldX, &magneticFieldY, &magneticFieldZ);
   esp32_azureiotkit_get_pitch_roll_accel(&pitch, &roll, &accelerationX, &accelerationY, &accelerationZ);
@@ -260,19 +264,19 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_begin_object(&jw);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed setting telemetry json root.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_TEMPERATURE));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ROOM_TEMPERATURE));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding temperature property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, temperature, DOUBLE_DECIMAL_PLACE_DIGITS);
+  rc = az_json_writer_append_double(&jw, roomtemp, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding temperature property value to telemetry payload. ");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_HUMIDITY));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ROOM_HUMIDITY));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding humidity property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, humidity, DOUBLE_DECIMAL_PLACE_DIGITS);
+  rc = az_json_writer_append_double(&jw, roomhum, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding humidity property value to telemetry payload. ");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_LIGHT));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_OUTSIDE_TEMPERATURE));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding light property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, light, DOUBLE_DECIMAL_PLACE_DIGITS);
+  rc = az_json_writer_append_double(&jw, outsidetemp, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding light property value to telemetry payload.");
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_PRESSURE));
