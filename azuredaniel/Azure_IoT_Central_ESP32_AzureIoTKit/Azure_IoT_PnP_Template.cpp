@@ -6,6 +6,17 @@ DHT dht(DHT11PIN, DHT11);
 DHT dhtout(DHT11PINTOUT,DHT11);
 
 
+//pm2.5
+int measurePinOut = 36; 
+int ledPowerOut = 17; 
+int measurePin = 34;
+int ledPower = 21; 
+int samplingTime = 280; 
+int deltaTime = 40; 
+int sleepTime = 9680; 
+float voMeasured = 0;
+float calcVoltage = 0;
+float dustDensity = 0;
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
@@ -255,9 +266,72 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
 
   light = dhtout.readTemperature()*1.8+32;
    pressure  = dhtout.readHumidity();
-   altitude =0;
-  esp32_azureiotkit_get_magnetometer(&magneticFieldX, &magneticFieldY, &magneticFieldZ);
+   magneticFieldY=0;
+   magneticFieldZ=0;
   esp32_azureiotkit_get_pitch_roll_accel(&pitch, &roll, &accelerationX, &accelerationY, &accelerationZ);
+
+
+
+
+  digitalWrite(ledPower, LOW);
+  delayMicroseconds(samplingTime);
+  voMeasured = analogRead(measurePin); // read the dust value
+  delayMicroseconds(deltaTime);
+  digitalWrite(ledPower, HIGH);  
+  delayMicroseconds(sleepTime); 
+  // 0 - 5V mapped to 0 - 1023 integer values
+  // recover voltage
+  calcVoltage = voMeasured * (5.0 / 1024.0);
+  dustDensity = 170 * calcVoltage - 0.1;
+  int pm; 
+  if (dustDensity < 150) {
+    pm = 1;
+  }
+  if (dustDensity >= 150 && dustDensity < 300) {
+    pm = 2;
+  }
+  if (dustDensity >= 300 && dustDensity < 1050) {
+    pm = 3;
+  }
+  if (dustDensity >= 1050 && dustDensity < 3000) {
+    pm = 4;
+  }
+  if (dustDensity >= 3000) {
+    pm = 5;
+  } 
+  altitude = pm;
+
+  digitalWrite(ledPowerOut, LOW);
+  delayMicroseconds(samplingTime);
+  voMeasured = analogRead(measurePinOut); // read the dust value
+  delayMicroseconds(deltaTime);
+  digitalWrite(ledPowerOut, HIGH);  
+  delayMicroseconds(sleepTime); 
+  // 0 - 5V mapped to 0 - 1023 integer values
+  // recover voltage
+  calcVoltage = voMeasured * (5.0 / 1024.0);
+  dustDensity = 170 * calcVoltage - 0.1;
+  int pmout; 
+  if (dustDensity < 150) {
+    pmout = 1;
+  }
+  if (dustDensity >= 150 && dustDensity < 300) {
+    pmout = 2;
+  }
+  if (dustDensity >= 300 && dustDensity < 1050) {
+    pmout = 3;
+  }
+  if (dustDensity >= 1050 && dustDensity < 3000) {
+    pmout = 4;
+  }
+  if (dustDensity >= 3000) {
+    pmout = 5;
+  } 
+  magneticFieldX = pmout;
+
+
+
+
 
   rc = az_json_writer_init(&jw, payload_buffer_span, NULL);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed initializing json writer for telemetry.");
@@ -285,12 +359,12 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_double(&jw, pressure, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pressure property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ALTITUDE));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("insidepm25"));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property name to telemetry payload.");
   rc = az_json_writer_append_double(&jw, altitude, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERX));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidepm25"));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
   rc = az_json_writer_append_int32(&jw, magneticFieldX);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
@@ -529,4 +603,5 @@ static int consume_properties_and_generate_response(
 
   return RESULT_OK;
 }
+
 
