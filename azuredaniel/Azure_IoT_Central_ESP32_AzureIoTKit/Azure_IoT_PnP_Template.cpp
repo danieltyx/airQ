@@ -1,3 +1,13 @@
+#include <ESP32Servo.h>
+
+Servo myServo; 
+#define servopin A0
+
+int findStrokePercent(int strokePercent) {
+  return map(strokePercent,0,100,0,180);
+}
+
+
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
@@ -112,6 +122,7 @@ static int consume_properties_and_generate_response(
 /* --- Public Functions --- */
 void azure_pnp_init()
 {
+  myServo.attach(servopin, 1000, 2000);
   esp32_azureiotkit_initialize_sensors();
 
   esp32_azureiotkit_oled_clean_screen();

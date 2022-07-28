@@ -59,6 +59,14 @@
 #include "AzureIoT.h"
 #include "Azure_IoT_PnP_Template.h"
 #include "iot_configs.h"
+// #include <ESP32Servo.h>
+
+// Servo myServo; 
+// #define servopin A0
+
+// int findStrokePercent(int strokePercent) {
+//   return map(strokePercent,0,100,0,180);
+// }
 
 /* --- Sample-specific Settings --- */
 #define SERIAL_LOGGER_BAUD_RATE 115200
@@ -328,7 +336,7 @@ static void on_command_request_received(command_request_t command)
 /* --- Arduino setup and loop Functions --- */
 void setup()
 {
-
+  //myServo.attach(servopin, 1000, 2000);
   // Serial.begin(115200);
   // dht.begin();
 
@@ -385,7 +393,14 @@ void setup()
 void loop()
 {
 
-
+  // for (int i=0; i<=100; i+=5) {
+  //   myServo.write(findStrokePercent(i));
+  //   delay(1000); 
+  // }
+  // for (int i=100; i>=0; i-=5) {
+  //   myServo.write(findStrokePercent(i));
+  //   delay(1000); 
+  // }
   // float humi = dht.readHumidity();
   // float temp = dht.readTemperature();
   // Serial.print("Temperature: ");
