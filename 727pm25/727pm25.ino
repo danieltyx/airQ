@@ -47,6 +47,6 @@ else
 {
   level = 5;
 }
-// Serial.println(res);
+Serial.println(res);
 Serial.println(level);
 }
