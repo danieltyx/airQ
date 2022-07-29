@@ -40,6 +40,7 @@
 #include <cstdarg>
 #include <string.h>
 #include <time.h>
+#include "globals.h"
 
 // For hmac SHA256 encryption
 #include <mbedtls/base64.h>
@@ -87,6 +88,12 @@
 /* --- Function Returns --- */
 #define RESULT_OK       0
 #define RESULT_ERROR    __LINE__
+
+int voc = -1;
+double temp = -1;
+double humidity = -1;
+String bufferedInput = "";
+char inputCharacter = '\0';
 
 /* --- Handling iot_config.h Settings --- */
 static const char* wifi_ssid = IOT_CONFIG_WIFI_SSID;
@@ -388,11 +395,35 @@ void setup()
   azure_iot_start(&azure_iot);
 
   LogInfo("Azure IoT client initialized (state=%d)", azure_iot.state);
+  Serial2.begin(115200);
 }
 
 void loop()
 {
-
+if(Serial2.available()){
+    inputCharacter = Serial2.read();
+    if(inputCharacter == '\n') { 
+      // If the input characer is a line feed,
+      // we should compare and act on the input String
+      if(bufferedInput.charAt(0) == 'A') {
+        temp = bufferedInput.substring(1).toInt();
+      } else if(bufferedInput.charAt(0) == 'B'){
+        humidity = bufferedInput.substring(1).toInt();
+      } else if(bufferedInput.charAt(0) == 'C'){
+        voc = bufferedInput.substring(1).toInt();
+      } else {
+        Serial.println("Unexpected input");
+      }
+      // Print the recieved String and clear buffer
+      Serial.println(bufferedInput);
+      Serial2.println("OK");
+      bufferedInput = "";
+    } else if(inputCharacter != '\r'){
+      // As long as the character is (also) not
+      // a carrige return, add it to the input buffer
+      bufferedInput += inputCharacter;
+    }    
+  }
   // for (int i=0; i<=100; i+=5) {
   //   myServo.write(findStrokePercent(i));
   //   delay(1000); 

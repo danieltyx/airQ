@@ -1,16 +1,24 @@
-//temp&hum
+//temp&hum : Outside
 #include "DHT.h"
 #define DHT11PIN 18
-#define DHT11PINTOUT 16
+#define DHT11PINTOUT 4
 DHT dht(DHT11PIN, DHT11);
 DHT dhtout(DHT11PINTOUT,DHT11);
 
+int hum_dht;
+//voc
+#include "Adafruit_SHT4x.h"
+#include <Wire.h>
+#include "Adafruit_SGP40.h"
+#include "globals.h"
+Adafruit_SGP40 sgp;
+Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
 //pm2.5
-int measurePinOut = 36; 
-int ledPowerOut = 17; 
-int measurePin = 34;
-int ledPower = 21; 
+// int measurePinOut = 5; 
+// int ledPowerOut = 21; 
+int measurePin = 36;
+int ledPower = 19; 
 int samplingTime = 280; 
 int deltaTime = 40; 
 int sleepTime = 9680; 
@@ -258,10 +266,11 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   float temperature, humidity, light, pressure, altitude;
   int32_t magneticFieldX, magneticFieldY, magneticFieldZ;
   int32_t pitch, roll, accelerationX, accelerationY, accelerationZ;
-
+  dht.begin();
   // Acquiring data from Espressif's ESP32 Azure IoT Kit sensors.
   temperature = dht.readTemperature()*1.8+32;
-  humidity = dht.readHumidity();
+ // humidity = dht.readHumidity();
+  hum_dht = dht.readHumidity();
   dhtout.begin();
 
   light = dhtout.readTemperature()*1.8+32;
@@ -301,36 +310,36 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   } 
   altitude = pm;
 
-  digitalWrite(ledPowerOut, LOW);
-  delayMicroseconds(samplingTime);
-  voMeasured = analogRead(measurePinOut); // read the dust value
-  delayMicroseconds(deltaTime);
-  digitalWrite(ledPowerOut, HIGH);  
-  delayMicroseconds(sleepTime); 
-  // 0 - 5V mapped to 0 - 1023 integer values
-  // recover voltage
-  calcVoltage = voMeasured * (5.0 / 1024.0);
-  dustDensity = 170 * calcVoltage - 0.1;
-  int pmout; 
-  if (dustDensity < 150) {
-    pmout = 1;
-  }
-  if (dustDensity >= 150 && dustDensity < 300) {
-    pmout = 2;
-  }
-  if (dustDensity >= 300 && dustDensity < 1050) {
-    pmout = 3;
-  }
-  if (dustDensity >= 1050 && dustDensity < 3000) {
-    pmout = 4;
-  }
-  if (dustDensity >= 3000) {
-    pmout = 5;
-  } 
-  magneticFieldX = pmout;
+  // digitalWrite(ledPowerOut, LOW);
+  // delayMicroseconds(samplingTime);
+  // voMeasured = analogRead(measurePinOut); // read the dust value
+  // delayMicroseconds(deltaTime);
+  // digitalWrite(ledPowerOut, HIGH);  
+  // delayMicroseconds(sleepTime); 
+  // // 0 - 5V mapped to 0 - 1023 integer values
+  // // recover voltage
+  // calcVoltage = voMeasured * (5.0 / 1024.0);
+  // dustDensity = 170 * calcVoltage - 0.1;
+  // int pmout; 
+  // if (dustDensity < 150) {
+  //   pmout = 1;
+  // }
+  // if (dustDensity >= 150 && dustDensity < 300) {
+  //   pmout = 2;
+  // }
+  // if (dustDensity >= 300 && dustDensity < 1050) {
+  //   pmout = 3;
+  // }
+  // if (dustDensity >= 1050 && dustDensity < 3000) {
+  //   pmout = 4;
+  // }
+  // if (dustDensity >= 3000) {
+  //   pmout = 5;
+  // } 
+  // magneticFieldX = pmout;
 
-
-
+  magneticFieldY = voc;
+  magneticFieldZ = 0;
 
 
   rc = az_json_writer_init(&jw, payload_buffer_span, NULL);
@@ -346,7 +355,7 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("roomhum"));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding humidity property name to telemetry payload.");
-  rc = az_json_writer_append_double(&jw, humidity, DOUBLE_DECIMAL_PLACE_DIGITS);
+  rc = az_json_writer_append_double(&jw, hum_dht, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding humidity property value to telemetry payload. ");
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidetemp"));
@@ -364,45 +373,16 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_double(&jw, altitude, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidepm25"));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, magneticFieldX);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
+  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidepm25"));
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
+  // rc = az_json_writer_append_int32(&jw, magneticFieldX);
+  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERY));
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("voc"));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property name to telemetry payload.");
   rc = az_json_writer_append_int32(&jw, magneticFieldY);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property value to telemetry payload.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_MAGNETOMETERZ));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, magneticFieldZ);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Z) property value to telemetry payload.");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_PITCH));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, pitch);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding pitch property value to telemetry payload.");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ROLL));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, roll);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding roll property value to telemetry payload.");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERX));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationX);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(X) property value to telemetry payload.");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERY));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationY);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Y) property value to telemetry payload.");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(TELEMETRY_PROP_NAME_ACCELEROMETERZ));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property name to telemetry payload.");
-  rc = az_json_writer_append_int32(&jw, accelerationZ);
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding acceleration(Z) property value to telemetry payload.");
 
   rc = az_json_writer_append_end_object(&jw);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed closing telemetry json payload.");
