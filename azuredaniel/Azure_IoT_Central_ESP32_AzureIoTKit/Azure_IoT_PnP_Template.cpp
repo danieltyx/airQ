@@ -15,8 +15,8 @@ Adafruit_SGP40 sgp;
 Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
 //pm2.5
-// int measurePinOut = 5; 
-// int ledPowerOut = 21; 
+int measurePinOut = 5; 
+int ledPowerOut = 21; 
 int measurePin = 36;
 int ledPower = 19; 
 int samplingTime = 280; 
@@ -310,33 +310,33 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   } 
   altitude = pm;
 
-  // digitalWrite(ledPowerOut, LOW);
-  // delayMicroseconds(samplingTime);
-  // voMeasured = analogRead(measurePinOut); // read the dust value
-  // delayMicroseconds(deltaTime);
-  // digitalWrite(ledPowerOut, HIGH);  
-  // delayMicroseconds(sleepTime); 
-  // // 0 - 5V mapped to 0 - 1023 integer values
-  // // recover voltage
-  // calcVoltage = voMeasured * (5.0 / 1024.0);
-  // dustDensity = 170 * calcVoltage - 0.1;
-  // int pmout; 
-  // if (dustDensity < 150) {
-  //   pmout = 1;
-  // }
-  // if (dustDensity >= 150 && dustDensity < 300) {
-  //   pmout = 2;
-  // }
-  // if (dustDensity >= 300 && dustDensity < 1050) {
-  //   pmout = 3;
-  // }
-  // if (dustDensity >= 1050 && dustDensity < 3000) {
-  //   pmout = 4;
-  // }
-  // if (dustDensity >= 3000) {
-  //   pmout = 5;
-  // } 
-  // magneticFieldX = pmout;
+  digitalWrite(ledPowerOut, LOW);
+  delayMicroseconds(samplingTime);
+  voMeasured = analogRead(measurePinOut); // read the dust value
+  delayMicroseconds(deltaTime);
+  digitalWrite(ledPowerOut, HIGH);  
+  delayMicroseconds(sleepTime); 
+  // 0 - 5V mapped to 0 - 1023 integer values
+  // recover voltage
+  calcVoltage = voMeasured * (5.0 / 1024.0);
+  dustDensity = 170 * calcVoltage - 0.1;
+  int pmout; 
+  if (dustDensity < 150) {
+    pmout = 1;
+  }
+  if (dustDensity >= 150 && dustDensity < 300) {
+    pmout = 2;
+  }
+  if (dustDensity >= 300 && dustDensity < 1050) {
+    pmout = 3;
+  }
+  if (dustDensity >= 1050 && dustDensity < 3000) {
+    pmout = 4;
+  }
+  if (dustDensity >= 3000) {
+    pmout = 5;
+  } 
+  magneticFieldX = pmout;
 
   magneticFieldY = voc;
   magneticFieldZ = 0;
@@ -373,10 +373,10 @@ static int generate_telemetry_payload(uint8_t* payload_buffer, size_t payload_bu
   rc = az_json_writer_append_double(&jw, altitude, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding altitude property value to telemetry payload.");
 
-  // rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidepm25"));
-  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
-  // rc = az_json_writer_append_int32(&jw, magneticFieldX);
-  // EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("outsidepm25"));
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property name to telemetry payload.");
+  rc = az_json_writer_append_int32(&jw, magneticFieldX);
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(X) property value to telemetry payload.");
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("voc"));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding magnetometer(Y) property name to telemetry payload.");
